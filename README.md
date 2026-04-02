@@ -1,3 +1,4 @@
+HEAD
 # RPG Tracker
 
 Backend-first Django project for a personal RPG progression system.
@@ -45,3 +46,6 @@ Milestone 1 will add:
 - registration and login API
 - automatic CharacterProfile creation
 - profile endpoint
+=======
+# RPG_tracker
+a8c0bc12f43c06e22a13e8ec8edb7d93cfa86d6d
