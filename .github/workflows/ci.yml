@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .[dev]
+
+      - name: Ruff
+        run: python -m ruff check .
+
+      - name: Django checks
+        run: python manage.py check
+
+      - name: Migration drift check
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: OpenAPI validation
+        run: python manage.py spectacular --file openapi-schema.yaml --validate
+
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [sqlite, postgres]
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: rpg_tracker
+          POSTGRES_USER: rpg_tracker
+          POSTGRES_PASSWORD: rpg_tracker
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U rpg_tracker -d rpg_tracker"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .[dev]
+
+      - name: Run tests on SQLite
+        if: matrix.database == 'sqlite'
+        run: python -m pytest -q
+
+      - name: Run tests on PostgreSQL
+        if: matrix.database == 'postgres'
+        env:
+          POSTGRES_DB: rpg_tracker
+          POSTGRES_USER: rpg_tracker
+          POSTGRES_PASSWORD: rpg_tracker
+          POSTGRES_HOST: 127.0.0.1
+          POSTGRES_PORT: 5432
+        run: python -m pytest -q

@@ -9,5 +9,8 @@ __pycache__/
 coverage.xml
 htmlcov/
 staticfiles/
+*.egg-info/
+openapi-schema.yaml
 .idea/
 .vscode/
+.local/

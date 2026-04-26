@@ -1,3 +1,5 @@
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
 from rest_framework import serializers
 
 from apps.characters.models import CharacterProfile
@@ -17,6 +19,8 @@ class CharacterProfileSerializer(serializers.ModelSerializer):
             "total_xp",
             "current_streak",
             "longest_streak",
+            "timezone",
+            "last_activity_on",
             "created_at",
             "updated_at",
         )
@@ -27,6 +31,7 @@ class CharacterProfileSerializer(serializers.ModelSerializer):
             "total_xp",
             "current_streak",
             "longest_streak",
+            "last_activity_on",
             "created_at",
             "updated_at",
         )
@@ -35,4 +40,11 @@ class CharacterProfileSerializer(serializers.ModelSerializer):
 class CharacterProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CharacterProfile
-        fields = ("character_name",)
+        fields = ("character_name", "timezone")
+
+    def validate_timezone(self, value: str) -> str:
+        try:
+            ZoneInfo(value)
+        except ZoneInfoNotFoundError as exc:
+            raise serializers.ValidationError("Enter a valid IANA timezone name.") from exc
+        return value

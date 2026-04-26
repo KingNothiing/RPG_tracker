@@ -96,3 +96,32 @@ def test_authenticated_user_can_view_and_update_only_own_profile(db) -> None:
     assert user.character_profile.character_name == "Archmage"
     assert user.character_profile.level == 1
     assert other_user.character_profile.character_name == "warrior"
+
+
+def test_profile_timezone_can_be_updated_and_validated(db) -> None:
+    user = User.objects.create_user(
+        username="cleric",
+        email="cleric@example.com",
+        password="strongpass123",
+    )
+    token = Token.objects.create(user=user)
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+
+    valid_response = client.patch(
+        "/api/profile/",
+        {"timezone": "Europe/Chisinau"},
+        format="json",
+    )
+    invalid_response = client.patch(
+        "/api/profile/",
+        {"timezone": "Mars/Olympus"},
+        format="json",
+    )
+
+    user.character_profile.refresh_from_db()
+
+    assert valid_response.status_code == status.HTTP_200_OK
+    assert user.character_profile.timezone == "Europe/Chisinau"
+    assert invalid_response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "timezone" in invalid_response.data

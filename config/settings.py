@@ -14,10 +14,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "drf_spectacular",
     "rest_framework",
     "rest_framework.authtoken",
     "apps.accounts",
     "apps.characters",
+    "apps.habits",
+    "apps.progression",
+    "apps.quests",
 ]
 
 MIDDLEWARE = [
@@ -104,4 +108,14 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.BasicAuthentication",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "RPG Tracker API",
+    "DESCRIPTION": (
+        "Backend API for RPG-style progress tracking with habits, quests, XP, "
+        "streaks, and event history."
+    ),
+    "VERSION": "0.2.0",
 }

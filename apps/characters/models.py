@@ -15,6 +15,8 @@ class CharacterProfile(models.Model):
     total_xp = models.PositiveIntegerField(default=0)
     current_streak = models.PositiveIntegerField(default=0)
     longest_streak = models.PositiveIntegerField(default=0)
+    timezone = models.CharField(max_length=64, default="UTC")
+    last_activity_on = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

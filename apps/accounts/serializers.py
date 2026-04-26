@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
 
 from apps.accounts.services import register_user
+from apps.characters.serializers import CharacterProfileSerializer
 
 User = get_user_model()
 
@@ -18,8 +19,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ("username", "email", "password")
 
     def create(self, validated_data):
-        user, _token = register_user(**validated_data)
-        return user
+        return register_user(**validated_data)
 
 
 class LoginSerializer(serializers.Serializer):
@@ -36,3 +36,15 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Invalid username or password.")
         attrs["user"] = user
         return attrs
+
+
+class UserIdentitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("id", "username", "email")
+
+
+class AuthResponseSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    user = UserIdentitySerializer()
+    profile = CharacterProfileSerializer(required=False)
